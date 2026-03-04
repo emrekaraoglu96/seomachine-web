@@ -43,6 +43,8 @@ npm run lint   # ESLint
 | `src/lib/prompts/write-system.ts` | Writing system prompt (brand context, author voice, SEO rules) |
 | `src/lib/types.ts` | TypeScript interfaces (Project, Article, ResearchBrief, etc.) |
 | `src/components/voice-input.tsx` | Voice recording component (MediaRecorder + Whisper) |
+| `src/components/ui/skeleton.tsx` | Skeleton loading component (shadcn/ui) |
+| `src/app/(app)/error.tsx` | Error boundary for app routes (retry UI) |
 
 ### Voice Input Component
 - Uses **MediaRecorder API** (browser built-in) — NOT Web Speech API (unreliable, depends on Google servers)
@@ -62,3 +64,15 @@ When user provides voice transcript, it's injected as "Author's Voice Sample" se
 - UI components from shadcn/ui (`src/components/ui/`)
 - Toast notifications via Sonner
 - Project-scoped data (each article belongs to a project with brand settings)
+- Skeleton loaders for async data (dashboard grid, article detail)
+- Inline error states with retry for fetch failures
+- `@vercel/analytics` `track()` for custom events (client-side)
+
+## Analytics Events
+| Event | Location | Metadata |
+|-------|----------|----------|
+| `waitlist_signup` | Landing page | — |
+| `onboarding_completed` | Onboarding finish | industry, tone |
+| `article_research_started` | New article pipeline | hasVoice |
+| `article_created` | Pipeline done | score, wordCount |
+| `article_optimized` | Article detail | newScore |

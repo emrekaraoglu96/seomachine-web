@@ -9,7 +9,7 @@
 - Anthropic Claude API via Vercel AI SDK (`ai` + `@ai-sdk/anthropic`) — streaming
 - OpenAI Whisper for voice transcription
 - Supabase Auth (magic link) + PostgreSQL + RLS
-- Vercel deployment
+- Vercel deployment + Analytics + Speed Insights
 
 ## Status: MVP Beta — Live
 
@@ -74,26 +74,21 @@
 - [x] Magic link email template branded (MCO)
 - [x] Google OAuth button hidden (pending credentials)
 
+### Day 6: UX Polish + Analytics
+- [x] Loading skeleton states (dashboard grid + article detail two-column)
+- [x] Error boundaries — Next.js `error.tsx` + inline error states with retry
+- [x] Enhanced empty state for dashboard (pipeline flow visual + action CTA)
+- [x] Content quality review — prompts + scorer validated, no changes needed (intentional design)
+- [x] Vercel Analytics + Speed Insights (`@vercel/analytics`, `@vercel/speed-insights`)
+- [x] Custom event tracking: `waitlist_signup`, `onboarding_completed`, `article_research_started`, `article_created`, `article_optimized`
+
 ---
 
-## Next Up (Post-Launch Polish)
+## Next Up (Phase 2)
 
 ### Polish & UX
-- [ ] Loading skeleton states (dashboard, article page)
-- [ ] Error boundaries for API failures
-- [ ] Empty state for dashboard (first-time user)
 - [ ] Mobile responsive check (sidebar → hamburger?)
 - [ ] Dark mode support
-
-### Content Quality
-- [ ] Test article output quality across 5+ different topics
-- [ ] Tune write prompt for better hook formulas
-- [ ] Verify SEO scorer accuracy against manual checks
-- [ ] Test optimization apply flow end-to-end
-
-### Analytics & Tracking
-- [ ] Vercel Analytics (free tier)
-- [ ] Basic event tracking (article created, waitlist signup)
 
 ### Landing Page
 - [ ] OG image for social sharing
