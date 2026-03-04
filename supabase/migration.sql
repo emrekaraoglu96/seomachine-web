@@ -34,6 +34,7 @@ create table public.articles (
   seo_score integer,
   seo_score_breakdown jsonb,
   optimization_suggestions jsonb,
+  voice_transcript text,
   word_count integer default 0,
   created_at timestamptz default now(),
   updated_at timestamptz default now()

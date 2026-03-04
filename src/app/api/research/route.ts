@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const { topic, projectId } = await request.json();
+  const { topic, projectId, voiceTranscript } = await request.json();
 
   const { data: project } = await supabase
     .from("projects")
@@ -32,7 +32,9 @@ export async function POST(request: Request) {
       industry: project.industry,
       targetAudience: project.target_audience,
     }),
-    prompt: `Research this topic and create a comprehensive content brief: "${topic}"`,
+    prompt: voiceTranscript
+      ? `Research this topic and create a comprehensive content brief: "${topic}"\n\nThe author described their vision and angle in their own words:\n"""\n${voiceTranscript}\n"""\n\nUse the author's perspective to shape the research — prioritize their angle, key points, and unique insights when building the content outline.`
+      : `Research this topic and create a comprehensive content brief: "${topic}"`,
     maxOutputTokens: 4096,
   });
 

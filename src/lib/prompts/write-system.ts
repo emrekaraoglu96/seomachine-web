@@ -8,6 +8,7 @@ export function getWritePrompt(context: {
   toneOfVoice: string;
   toneDescription?: string;
   researchBrief: ResearchBrief;
+  authorVoice?: string;
 }) {
   const brief = context.researchBrief;
 
@@ -18,7 +19,23 @@ export function getWritePrompt(context: {
 ${context.industry ? `- Industry: ${context.industry}` : ""}
 ${context.targetAudience ? `- Target Audience: ${context.targetAudience}` : ""}
 - Tone: ${context.toneOfVoice}${context.toneDescription ? ` — ${context.toneDescription}` : ""}
+${
+  context.authorVoice
+    ? `
+## Author's Voice Sample
+The author described their vision in their own words:
+"""
+${context.authorVoice}
+"""
 
+Match the author's natural style throughout the article:
+- Mirror their vocabulary level (simple vs technical)
+- Echo their sentence rhythm (short punchy vs flowing)
+- Use their terminology and phrasing patterns
+- Capture their unique perspective and angle on the topic
+`
+    : ""
+}
 ## Content Brief
 - Target Keyword: "${brief.targetKeyword}"
 - Secondary Keywords: ${brief.secondaryKeywords.join(", ")}

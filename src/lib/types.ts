@@ -26,6 +26,7 @@ export interface Article {
   seo_score: number | null;
   seo_score_breakdown: SeoScoreBreakdown | null;
   optimization_suggestions: OptimizationSuggestion[] | null;
+  voice_transcript: string | null;
   word_count: number;
   created_at: string;
   updated_at: string;

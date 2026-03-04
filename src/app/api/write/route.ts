@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const { projectId, researchBrief } = await request.json();
+  const { projectId, researchBrief, authorVoice } = await request.json();
 
   const { data: project } = await supabase
     .from("projects")
@@ -37,6 +37,7 @@ export async function POST(request: Request) {
       toneOfVoice: project.tone_of_voice,
       toneDescription: project.tone_description,
       researchBrief,
+      authorVoice,
     }),
     prompt:
       "Write the complete article following the content brief and all writing rules. Output clean Markdown.",

@@ -14,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { VoiceInput } from "@/components/voice-input";
 import {
   Search,
   PenTool,
@@ -31,6 +32,7 @@ type PipelineStage = "topic" | "researching" | "research-done" | "writing" | "sc
 export default function NewArticlePage() {
   const { project, loading: projectLoading } = useProject();
   const [topic, setTopic] = useState("");
+  const [voiceTranscript, setVoiceTranscript] = useState("");
   const [stage, setStage] = useState<PipelineStage>("topic");
   const [researchBrief, setResearchBrief] = useState<ResearchBrief | null>(null);
   const [researchText, setResearchText] = useState("");
@@ -41,7 +43,7 @@ export default function NewArticlePage() {
   const supabase = createClient();
 
   const startResearch = useCallback(async (feedback?: string) => {
-    if (!project || !topic.trim()) return;
+    if (!project || (!topic.trim() && !voiceTranscript.trim())) return;
     setStage("researching");
     setResearchText("");
 
@@ -53,7 +55,11 @@ export default function NewArticlePage() {
       const res = await fetch("/api/research", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic: prompt, projectId: project.id }),
+        body: JSON.stringify({
+          topic: prompt,
+          projectId: project.id,
+          ...(voiceTranscript.trim() && { voiceTranscript: voiceTranscript.trim() }),
+        }),
       });
 
       if (!res.ok) throw new Error("Research failed");
@@ -86,7 +92,7 @@ export default function NewArticlePage() {
       setStage("topic");
       console.error(err);
     }
-  }, [project, topic]);
+  }, [project, topic, voiceTranscript]);
 
   const startWriting = useCallback(async () => {
     if (!project || !researchBrief) return;
@@ -100,6 +106,7 @@ export default function NewArticlePage() {
         body: JSON.stringify({
           projectId: project.id,
           researchBrief,
+          ...(voiceTranscript.trim() && { authorVoice: voiceTranscript.trim() }),
         }),
       });
 
@@ -147,6 +154,7 @@ export default function NewArticlePage() {
           project_id: project.id,
           user_id: user.id,
           topic,
+          voice_transcript: voiceTranscript.trim() || null,
           status: "draft",
           research_brief: researchBrief,
           content: fullText,
@@ -170,7 +178,7 @@ export default function NewArticlePage() {
       setStage("research-done");
       console.error(err);
     }
-  }, [project, researchBrief, topic, supabase]);
+  }, [project, researchBrief, topic, voiceTranscript, supabase]);
 
   if (projectLoading) {
     return (
@@ -222,25 +230,43 @@ export default function NewArticlePage() {
               Enter a topic, question, or keyword — be as specific as possible
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 startResearch();
               }}
-              className="flex gap-3"
+              className="space-y-4"
             >
-              <Input
-                placeholder="e.g., How to reduce SaaS churn with onboarding emails"
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                className="flex-1"
-                autoFocus
-              />
-              <Button type="submit" disabled={!topic.trim()}>
-                <Search className="h-4 w-4 mr-2" />
-                Research
-              </Button>
+              <div className="flex gap-3">
+                <Input
+                  placeholder="e.g., How to reduce SaaS churn with onboarding emails"
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value)}
+                  className="flex-1"
+                  autoFocus
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-muted-foreground">
+                  Describe your idea{" "}
+                  <span className="font-normal">
+                    — talk about what makes this topic interesting, your unique angle, key points you want to cover
+                  </span>
+                </label>
+                <VoiceInput
+                  value={voiceTranscript}
+                  onChange={setVoiceTranscript}
+                />
+              </div>
+
+              <div className="flex justify-end">
+                <Button type="submit" disabled={!topic.trim() && !voiceTranscript.trim()}>
+                  <Search className="h-4 w-4 mr-2" />
+                  Research
+                </Button>
+              </div>
             </form>
           </CardContent>
         </Card>
@@ -417,6 +443,7 @@ export default function NewArticlePage() {
                 onClick={() => {
                   setStage("topic");
                   setTopic("");
+                  setVoiceTranscript("");
                   setResearchBrief(null);
                   setResearchText("");
                   setArticleContent("");
