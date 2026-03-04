@@ -1,15 +1,17 @@
-# SEO — Project Tracker
+# MCO — Project Tracker
 
 > AI-powered SEO content platform for B2B marketing teams.
 > Path: `~/seomachine-web/` | Repo: `emrekaraoglu96/seomachine-web` (private)
+> **Production**: https://mco-ai.vercel.app
 
 ## Tech Stack
 - Next.js 16 + App Router + React 19 + Tailwind 4 + shadcn/ui
 - Anthropic Claude API via Vercel AI SDK (`ai` + `@ai-sdk/anthropic`) — streaming
-- Supabase Auth (magic link + Google) + PostgreSQL + RLS
+- OpenAI Whisper for voice transcription
+- Supabase Auth (magic link) + PostgreSQL + RLS
 - Vercel deployment
 
-## Status: MVP Beta — Pre-Launch
+## Status: MVP Beta — Live
 
 ---
 
@@ -21,7 +23,7 @@
 - [x] DB migration run (3 tables: projects, articles, waitlist + RLS policies)
 - [x] Supabase client/server/middleware utilities
 - [x] `middleware.ts` — auth token refresh + route protection
-- [x] Login page (magic link + Google OAuth)
+- [x] Login page (magic link)
 - [x] Auth callback route (`/auth/callback`)
 - [x] Landing page — hero, features (3 cards), how it works, CTA, footer
 - [x] Waitlist API route (`/api/waitlist`)
@@ -56,31 +58,25 @@
 - [x] Apply suggestions API — AI rewrites article + re-scores
 - [x] Per-suggestion "Apply" + "Apply All" buttons
 
-### Day 5: Deploy Prep
+### Day 5: Deploy + Voice Input
 - [x] `robots.txt` — blocks /dashboard, /articles, /api
 - [x] `sitemap.ts` — static for / and /login
 - [x] SEO metadata in layout
-- [x] Product renamed from "SEO Machine" to "SEO"
+- [x] Product renamed to "MCO"
 - [x] GitHub repo created + code pushed (private)
+- [x] Voice input component (MediaRecorder → Whisper transcription)
+- [x] `/api/transcribe` endpoint
+- [x] Author's voice injected into research + write prompts
+- [x] `voice_transcript` column added to articles table
+- [x] Vercel deployment (mco-ai.vercel.app)
+- [x] Env vars configured (Supabase, Anthropic, OpenAI)
+- [x] Supabase redirect URL + Site URL configured
+- [x] Magic link email template branded (MCO)
+- [x] Google OAuth button hidden (pending credentials)
 
 ---
 
-## In Progress
-
-### Vercel Deployment
-- [ ] Import repo on vercel.com/new
-- [ ] Add env vars (NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, ANTHROPIC_API_KEY)
-- [ ] Deploy + get production URL
-- [ ] Add Vercel URL to Supabase redirect URLs (Authentication > URL Configuration)
-- [ ] Test full auth flow on production
-
-### Magic Link Email
-- [ ] Customize email template in Supabase dashboard (Authentication > Email Templates)
-- [ ] Brand it with "SEO" name + clean design
-
----
-
-## Next Up (Post-Deploy)
+## Next Up (Post-Launch Polish)
 
 ### Polish & UX
 - [ ] Loading skeleton states (dashboard, article page)
@@ -88,11 +84,6 @@
 - [ ] Empty state for dashboard (first-time user)
 - [ ] Mobile responsive check (sidebar → hamburger?)
 - [ ] Dark mode support
-
-### Google OAuth
-- [ ] Create Google Cloud OAuth credentials
-- [ ] Add to Supabase Auth providers
-- [ ] Test Google login flow
 
 ### Content Quality
 - [ ] Test article output quality across 5+ different topics
@@ -108,11 +99,12 @@
 - [ ] OG image for social sharing
 - [ ] Product screenshots / demo GIF
 - [ ] Testimonials section (after beta feedback)
-- [ ] Proper product name + domain
+- [ ] Custom domain
 
 ---
 
-## NOT in MVP (v2 Backlog)
+## v2 Backlog
+- [ ] Google OAuth login
 - [ ] GA4 / Google Search Console integration
 - [ ] DataForSEO API for real keyword data
 - [ ] WordPress direct publishing
@@ -136,6 +128,8 @@
 | `src/app/(app)/articles/new/page.tsx` | Main pipeline UI (state machine) |
 | `src/app/(app)/articles/[id]/page.tsx` | Article viewer + optimization |
 | `src/components/app-shell.tsx` | App layout (sidebar + topbar) |
+| `src/components/voice-input.tsx` | Voice recording + Whisper transcription |
+| `src/app/api/transcribe/route.ts` | Voice → text API (OpenAI Whisper) |
 | `src/hooks/use-project.ts` | Project fetch + onboarding redirect |
 | `middleware.ts` | Auth guard + token refresh |
 | `supabase/migration.sql` | DB schema (3 tables + RLS) |
@@ -143,8 +137,13 @@
 ## Supabase
 - **URL**: `https://pdydcruhhtenwqqttubi.supabase.co`
 - **Region**: EU (Frankfurt)
-- **Tables**: projects, articles, waitlist
+- **Tables**: projects, articles (+ voice_transcript column), waitlist
 - **Auth**: Magic link enabled, Google OAuth pending
+
+## Deployment
+- **Vercel**: `mco-ai` project → https://mco-ai.vercel.app
+- **Deploy**: `vercel --prod` from project root
+- **Env vars**: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, ANTHROPIC_API_KEY, OPENAI_API_KEY
 
 ## Cost
 - ~$0.04-0.06 per article (Claude Sonnet)
