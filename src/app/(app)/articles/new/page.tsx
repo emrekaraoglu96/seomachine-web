@@ -25,6 +25,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
+import { track } from "@vercel/analytics";
 import type { ResearchBrief } from "@/lib/types";
 
 type PipelineStage = "topic" | "researching" | "research-done" | "writing" | "scoring" | "done";
@@ -46,6 +47,7 @@ export default function NewArticlePage() {
     if (!project || (!topic.trim() && !voiceTranscript.trim())) return;
     setStage("researching");
     setResearchText("");
+    track("article_research_started", { hasVoice: !!voiceTranscript.trim() });
 
     const prompt = feedback
       ? `${topic}\n\nUser feedback on previous research:\n${feedback}`
@@ -173,6 +175,7 @@ export default function NewArticlePage() {
       setArticleId(article.id);
       setStage("done");
       toast.success("Article created!");
+      track("article_created", { score: scoreData.score, wordCount: scoreData.wordCount });
     } catch (err) {
       toast.error("Something went wrong. Please try again.");
       setStage("research-done");

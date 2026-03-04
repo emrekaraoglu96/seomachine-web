@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { track } from "@vercel/analytics";
 
 function WaitlistForm() {
   const [email, setEmail] = useState("");
@@ -35,6 +36,7 @@ function WaitlistForm() {
       if (res.ok) {
         setSubmitted(true);
         toast.success(data.message);
+        track("waitlist_signup");
       } else {
         toast.error(data.error);
       }

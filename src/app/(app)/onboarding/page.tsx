@@ -17,6 +17,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, ArrowRight, Loader2, Zap } from "lucide-react";
 import { toast } from "sonner";
+import { track } from "@vercel/analytics";
 
 import { TONE_OPTIONS } from "@/lib/tone-options";
 
@@ -88,6 +89,7 @@ export default function OnboardingPage() {
     }
 
     toast.success("Project created!");
+    track("onboarding_completed", { industry: form.industry, tone: form.tone_of_voice });
     router.push("/dashboard");
   }
 

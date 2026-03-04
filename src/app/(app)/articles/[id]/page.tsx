@@ -27,8 +27,11 @@ import {
   AlertCircle,
   Info,
   Wand2,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
+import { track } from "@vercel/analytics";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { Article, OptimizationSuggestion, SeoScoreBreakdown } from "@/lib/types";
 
 const priorityIcons = {
@@ -86,30 +89,36 @@ export default function ArticlePage() {
   const router = useRouter();
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [optimizing, setOptimizing] = useState(false);
   const [applying, setApplying] = useState(false);
   const [suggestions, setSuggestions] = useState<OptimizationSuggestion[] | null>(null);
   const supabase = createClient();
 
-  useEffect(() => {
-    async function fetchArticle() {
-      const { data } = await supabase
-        .from("articles")
-        .select("*")
-        .eq("id", params.id)
-        .single();
+  const fetchArticle = useCallback(async () => {
+    setError(null);
+    setLoading(true);
 
-      if (data) {
-        setArticle(data as Article);
-        if (data.optimization_suggestions) {
-          setSuggestions(data.optimization_suggestions as OptimizationSuggestion[]);
-        }
+    const { data, error: fetchError } = await supabase
+      .from("articles")
+      .select("*")
+      .eq("id", params.id)
+      .single();
+
+    if (fetchError) {
+      setError(fetchError.message);
+    } else if (data) {
+      setArticle(data as Article);
+      if (data.optimization_suggestions) {
+        setSuggestions(data.optimization_suggestions as OptimizationSuggestion[]);
       }
-      setLoading(false);
     }
-
-    fetchArticle();
+    setLoading(false);
   }, [params.id, supabase]);
+
+  useEffect(() => {
+    fetchArticle();
+  }, [fetchArticle]);
 
   const handleCopyMarkdown = useCallback(() => {
     if (!article?.content) return;
@@ -281,6 +290,7 @@ export default function ArticlePage() {
       });
       setSuggestions(null);
       toast.success(`Applied! New SEO score: ${scoreData.score}/100`);
+      track("article_optimized", { newScore: scoreData.score });
     } catch (err) {
       toast.error("Failed to apply suggestions");
       console.error(err);
@@ -291,8 +301,114 @@ export default function ArticlePage() {
 
   if (loading) {
     return (
+      <div className="space-y-4">
+        {/* Header skeleton */}
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-8 w-16" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-6 w-2/3" />
+            <Skeleton className="h-4 w-1/3" />
+          </div>
+          <div className="flex gap-2">
+            <Skeleton className="h-8 w-20" />
+            <Skeleton className="h-8 w-20" />
+            <Skeleton className="h-8 w-24" />
+          </div>
+        </div>
+
+        <div className="grid lg:grid-cols-[1fr_340px] gap-6">
+          {/* Content skeleton */}
+          <Card>
+            <CardContent className="p-6 space-y-4">
+              <Skeleton className="h-8 w-3/4" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+              <Skeleton className="h-6 w-1/2 mt-4" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-4/5" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-6 w-2/5 mt-4" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+            </CardContent>
+          </Card>
+
+          {/* Sidebar skeleton */}
+          <div className="space-y-4">
+            {/* Score ring */}
+            <Card>
+              <CardHeader className="pb-2">
+                <Skeleton className="h-5 w-24" />
+              </CardHeader>
+              <CardContent className="flex justify-center">
+                <Skeleton className="h-32 w-32 rounded-full" />
+              </CardContent>
+            </Card>
+
+            {/* Breakdown */}
+            <Card>
+              <CardHeader className="pb-2">
+                <Skeleton className="h-5 w-36" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="space-y-1.5">
+                    <div className="flex justify-between">
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-4 w-10" />
+                    </div>
+                    <Skeleton className="h-2 w-full rounded-full" />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* Meta tags */}
+            <Card>
+              <CardHeader className="pb-2">
+                <Skeleton className="h-5 w-24" />
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div>
+                  <Skeleton className="h-3 w-20 mb-1" />
+                  <Skeleton className="h-4 w-full" />
+                </div>
+                <div>
+                  <Skeleton className="h-3 w-28 mb-1" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4 mt-1" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <Card className="max-w-md w-full">
+          <CardContent className="flex flex-col items-center text-center py-10">
+            <AlertCircle className="h-10 w-10 text-destructive mb-4" />
+            <h3 className="font-semibold mb-1">Failed to load article</h3>
+            <p className="text-sm text-muted-foreground mb-6">{error}</p>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => router.push("/dashboard")}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Dashboard
+              </Button>
+              <Button onClick={fetchArticle}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Try Again
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
